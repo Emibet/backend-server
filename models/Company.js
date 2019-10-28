@@ -5,6 +5,7 @@ const { ObjectId } = Schema.Types;
 
 const companySchema = new Schema(
   {
+    company: { type: Boolean, default: true },
     username: { type: String, required: true, unique: true },
     hashedPassword: { type: String, required: true },
     contactName: String,

@@ -4,6 +4,7 @@ const router = express.Router();
 
 const Job = require('../models/Job');
 const User = require('../models/User');
+const Company = require('../models/Company');
 
 router.post('/:username/new', async (req, res, next) => {
   const { username } = req.params;
@@ -22,8 +23,8 @@ router.post('/:username/new', async (req, res, next) => {
   } = req.body;
 
   try {
-    const user = await User.find({ username });
-    console.log(user[0].username);
+    const company = await Company.find({ username });
+    console.log(company[0].username);
     const job = await Job.create({
       title,
       location,
@@ -33,10 +34,16 @@ router.post('/:username/new', async (req, res, next) => {
       experienceMin,
       workDay,
       study,
-      author: user[0]._id,
+      author: company[0]._id,
       requirementMin,
       urgent,
     });
+
+    const companyUpdate = await Company.findOneAndUpdate(
+      { _id: company[0]._id },
+      { $push: { jobs: job._id } },
+      { upsert: true },
+    );
     res.json({
       status: 200,
       job,
