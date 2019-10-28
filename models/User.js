@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-// const { ObjectId } = Schema.Types;
+const { ObjectId } = Schema.Types;
 
 const userSchema = new Schema(
   {
@@ -22,6 +22,8 @@ const userSchema = new Schema(
       specialty: String,
       birthday: Date,
       dni: String,
+      candidateTo: [{ type: ObjectId, ref: 'Job' }],
+      jobs: [{ type: ObjectId, ref: 'Job' }],
       resume: {
         freelance: Boolean,
         licenseNumber: Number,

@@ -16,6 +16,7 @@ const jobSchema = new Schema(
     author: { type: ObjectId, ref: 'Company' },
     requirementMin: String,
     urgent: Boolean,
+    employee: { type: ObjectId, ref: 'User' },
     applicants: [
       {
         type: ObjectId,

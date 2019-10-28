@@ -11,15 +11,19 @@ require('dotenv').config();
 
 mongoose.set('useCreateIndex', true);
 mongoose
-  .connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log('connected to: ', process.env.MONGO_URL);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
   });
 
 const authRouter = require('./routes/auth');
+const jobsRouter = require('./routes/jobs');
 
 const app = express();
 
@@ -57,6 +61,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/', authRouter);
+app.use('/jobs', jobsRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
