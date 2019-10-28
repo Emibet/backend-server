@@ -56,7 +56,32 @@ router.post('/:username/new', async (req, res, next) => {
 router.get('/all', async (req, res, next) => {
   try {
     const jobs = await Job.find().populate('author employee');
-    res.json(jobs);
+    res.json({ status: 200, jobs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:username/all', async (req, res, next) => {
+  const { username } = req.params;
+  try {
+    const company = await Company.find({ username });
+    const jobs = await Job.find({ author: company[0]._id }).populate(
+      'author employee',
+    );
+    res.json({ status: 200, jobs });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:jobId/detail', async (req, res, next) => {
+  const { jobId } = req.params;
+  try {
+    const job = await Job.findById(jobId).populate(
+      'author employee applicants',
+    );
+    res.json({ status: 200, job });
   } catch (error) {
     next(error);
   }
