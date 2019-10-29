@@ -1,7 +1,7 @@
 const express = require('express');
 
 const router = express.Router();
-
+const mongoose = require('mongoose');
 const Job = require('../models/Job');
 const User = require('../models/User');
 const Company = require('../models/Company');
@@ -82,6 +82,25 @@ router.get('/:jobId/detail', async (req, res, next) => {
       'author employee applicants',
     );
     res.json({ status: 200, job });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE route => to delete a specific job
+router.delete('/:jobId', async (req, res, next) => {
+  const { jobId } = req.params;
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+    const removedJob = await Job.findByIdAndRemove(jobId);
+    res.json({
+      status: 200,
+      removedJob,
+      message: `Job with id: ${jobId} is removed successfully`,
+    });
   } catch (error) {
     next(error);
   }
