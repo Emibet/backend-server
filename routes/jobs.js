@@ -6,6 +6,7 @@ const Job = require('../models/Job');
 const User = require('../models/User');
 const Company = require('../models/Company');
 
+// POST route => to create a new Job
 router.post('/:username/new', async (req, res, next) => {
   const { username } = req.params;
   const {
@@ -53,6 +54,7 @@ router.post('/:username/new', async (req, res, next) => {
   }
 });
 
+// GET route => to view all JOBS
 router.get('/all', async (req, res, next) => {
   try {
     const jobs = await Job.find().populate('author employee');
@@ -62,6 +64,7 @@ router.get('/all', async (req, res, next) => {
   }
 });
 
+// GET route => to view all JOBS Posted by a specific Company
 router.get('/:username/all', async (req, res, next) => {
   const { username } = req.params;
   try {
@@ -75,6 +78,7 @@ router.get('/:username/all', async (req, res, next) => {
   }
 });
 
+// GET route => to view the JOB Detail by Id
 router.get('/:jobId/detail', async (req, res, next) => {
   const { jobId } = req.params;
   try {
@@ -87,7 +91,26 @@ router.get('/:jobId/detail', async (req, res, next) => {
   }
 });
 
-// DELETE route => to delete a specific job
+// PUT route => to update a specidifc JOB
+router.put('/:jobId', async (req, res, next) => {
+  const { jobId } = req.params;
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+    const job = await Job.findByIdAndUpdate(jobId, req.body, { new: true });
+    res.json({
+      status: 200,
+      job,
+      message: `Job with id: ${jobId} updated successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE route => to delete a specific JOB
 router.delete('/:jobId', async (req, res, next) => {
   const { jobId } = req.params;
   try {
@@ -96,9 +119,14 @@ router.delete('/:jobId', async (req, res, next) => {
       return;
     }
     const removedJob = await Job.findByIdAndRemove(jobId);
+    const companyJob = removedJob.author;
+    const updatedCompany = await Company.findByIdAndUpdate(companyJob, {
+      $pull: { jobs: jobId },
+    });
     res.json({
       status: 200,
       removedJob,
+      updatedCompany,
       message: `Job with id: ${jobId} is removed successfully`,
     });
   } catch (error) {
