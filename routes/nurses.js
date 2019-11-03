@@ -30,6 +30,11 @@ router.get('/:nurseId/detail', async (req, res, next) => {
 // PUT route => to update NURSE PROFILE
 router.put('/profile/edit', async (req, res, next) => {
   // const { jobId } = req.params;
+  console.log('TCL: req.body', req.body);
+  console.log(
+    'TCL: checkUsernameAndPasswordNotEmpty -> res.locals.auth',
+    res.locals.auth,
+  );
   const actualUserId = req.session.currentUser._id;
   try {
     if (!mongoose.Types.ObjectId.isValid(actualUserId)) {
@@ -43,6 +48,7 @@ router.put('/profile/edit', async (req, res, next) => {
         req.body,
         { new: true },
       );
+      req.session.currentUser = nurseUpdated;
       res.json({
         status: 200,
         nurseUpdated,

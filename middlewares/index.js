@@ -9,6 +9,7 @@ const checkIfLoggedIn = (req, res, next) => {
 
 const checkUsernameAndPasswordNotEmpty = (req, res, next) => {
   const { username, password } = req.body;
+  console.log('TCL: checkUsernameAndPasswordNotEmpty -> req.body', req.body);
 
   if (username !== '' && password !== '') {
     res.locals.auth = req.body;

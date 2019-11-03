@@ -23,6 +23,7 @@ router.post(
   checkUsernameAndPasswordNotEmpty,
   async (req, res, next) => {
     const { username, password, company } = res.locals.auth;
+    console.log('TCL: company', company);
     try {
       const user = await User.findOne({ username });
       if (user) {
