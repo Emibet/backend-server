@@ -6,6 +6,7 @@ const { ObjectId } = Schema.Types;
 const jobSchema = new Schema(
   {
     title: String,
+    description: String,
     location: String,
     contractType: String,
     salaryMin: Number,
@@ -15,7 +16,7 @@ const jobSchema = new Schema(
     study: String,
     author: { type: ObjectId, ref: 'Company' },
     requirementMin: String,
-    urgent: Boolean,
+    urgent: { type: Boolean, default: false },
     employee: { type: ObjectId, ref: 'User' },
     done: { type: Boolean, default: false },
     applicants: [

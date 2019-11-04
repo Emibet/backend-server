@@ -30,6 +30,7 @@ router.get('/:companyId/detail', async (req, res, next) => {
 // PUT route => to update COMPANY PROFILE
 router.put('/profile/edit', async (req, res, next) => {
   // const { jobId } = req.params;
+  console.log('TCL: req.body UPDATE COMPANY: ', req.body);
   const actualUserId = req.session.currentUser._id;
   try {
     if (!mongoose.Types.ObjectId.isValid(actualUserId)) {
@@ -43,6 +44,7 @@ router.put('/profile/edit', async (req, res, next) => {
         req.body,
         { new: true },
       );
+      req.session.currentUser = companyUpdated;
       res.json({
         status: 200,
         companyUpdated,

@@ -67,6 +67,7 @@ router.post(
       }
       if (company) {
         if (bcrypt.compareSync(password, company.hashedPassword)) {
+          console.log('TCL: company', company);
           req.session.currentUser = company;
           return res.json(company);
         }

@@ -27,7 +27,7 @@ const userSchema = new Schema(
       driverLicense: { type: Boolean, default: false },
       car: { type: Boolean, default: false },
       resume: {
-        freelance: Boolean,
+        freelance: { type: Boolean, default: false },
         licenseNumber: Number,
         nurseDegree: {
           year: Date,
@@ -36,7 +36,7 @@ const userSchema = new Schema(
           {
             company: String,
             job: String,
-            currentJob: Boolean,
+            currentJob: { type: Boolean, default: false },
             startDate: Date,
             endDate: Date,
             jobDescription: String,
