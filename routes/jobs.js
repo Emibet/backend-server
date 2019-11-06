@@ -110,6 +110,70 @@ router.put('/:jobId', async (req, res, next) => {
   }
 });
 
+// PUT route => to put a USER in applicants ARRAY
+router.put('/:jobId/:userId/add', async (req, res, next) => {
+  const { jobId, userId } = req.params;
+  // console.log('TCL: req.body APPLY JOB', req.body);
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+    const job = await Job.findByIdAndUpdate(
+      jobId,
+      { $push: { applicants: userId } },
+      { new: true },
+    );
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $push: { 'nurse.candidateTo': jobId } },
+      { new: true },
+    );
+    // console.log('TCL: user', user);
+    // console.log('TCL: userID, jobID: ', jobId);
+    res.json({
+      status: 200,
+      job,
+      user,
+      message: `Job with id: ${jobId} updated successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT route => to quit a USER in applicants ARRAY
+router.put('/:jobId/:userId/cancel', async (req, res, next) => {
+  const { jobId, userId } = req.params;
+  // console.log('TCL: req.body CANCEL APPLY JOB', req.body);
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+    const job = await Job.findByIdAndUpdate(
+      jobId,
+      { $pull: { applicants: userId } },
+      { new: true },
+    );
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { 'nurse.candidateTo': jobId } },
+      { new: true },
+    );
+    // console.log('TCL: user', user);
+    // console.log('TCL: userID, jobID: ', jobId);
+    res.json({
+      status: 200,
+      job,
+      user,
+      message: `Job with id: ${jobId} updated successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // DELETE route => to delete a specific JOB
 router.delete('/:jobId', async (req, res, next) => {
   const { jobId } = req.params;
