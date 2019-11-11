@@ -20,7 +20,9 @@ router.get('/all', async (req, res, next) => {
 router.get('/:nurseId/detail', async (req, res, next) => {
   const { nurseId } = req.params;
   try {
-    const nurse = await User.findById(nurseId).populate('candidateTo jobs');
+    const nurse = await User.findById(nurseId).populate(
+      'nurse.candidateTo jobs',
+    );
     res.json({ status: 200, nurse });
   } catch (error) {
     next(error);

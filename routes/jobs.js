@@ -123,13 +123,16 @@ router.put('/:jobId/:userId/add', async (req, res, next) => {
       jobId,
       { $push: { applicants: userId } },
       { new: true },
-    );
+    ).populate('applicants');
     const user = await User.findByIdAndUpdate(
       userId,
       { $push: { 'nurse.candidateTo': jobId } },
       { new: true },
     );
-    // console.log('TCL: user', user);
+    // .populate('nurse.candidateTo'); // Be carefull...!!!
+    console.log('TCL: user', user);
+    req.session.currentUser = user;
+
     // console.log('TCL: userID, jobID: ', jobId);
     res.json({
       status: 200,
@@ -155,18 +158,68 @@ router.put('/:jobId/:userId/cancel', async (req, res, next) => {
       jobId,
       { $pull: { applicants: userId } },
       { new: true },
-    );
+    ).populate('applicants');
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { 'nurse.candidateTo': jobId } },
       { new: true },
     );
+    req.session.currentUser = user;
+
     // console.log('TCL: user', user);
     // console.log('TCL: userID, jobID: ', jobId);
     res.json({
       status: 200,
       job,
       user,
+      message: `Job with id: ${jobId} updated successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT route => to assign a USER to JOB
+router.put('/:jobId/:nurseId/assign', async (req, res, next) => {
+  const { jobId, nurseId } = req.params;
+  // console.log('TCL: req.body APPLY JOB', req.body);
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+    let job = await Job.findByIdAndUpdate(
+      jobId,
+      { $set: { employee: nurseId } },
+      { new: true },
+    ).populate('applicants');
+
+    job = await await Job.findByIdAndUpdate(
+      jobId,
+      { $pull: { applicants: nurseId } },
+      { new: true },
+    ).populate('applicants');
+
+    let nurse = await User.findByIdAndUpdate(
+      nurseId,
+      { $pull: { 'nurse.candidateTo': jobId } },
+      { new: true },
+    );
+
+    nurse = await User.findByIdAndUpdate(
+      nurseId,
+      { $push: { 'nurse.jobs': jobId } },
+      { new: true },
+    );
+    // .populate('nurse.candidateTo'); // Be carefull...!!!
+    console.log('TCL: user', nurse);
+    // req.session.currentUser = user;
+
+    // console.log('TCL: userID, jobID: ', jobId);
+    res.json({
+      status: 200,
+      job,
+      nurse,
       message: `Job with id: ${jobId} updated successfully`,
     });
   } catch (error) {
