@@ -83,7 +83,7 @@ router.get('/:jobId/detail', async (req, res, next) => {
   const { jobId } = req.params;
   try {
     const job = await Job.findById(jobId).populate(
-      'author employee applicants',
+      'author employee applicants.user',
     );
     res.json({ status: 200, job });
   } catch (error) {
@@ -121,9 +121,10 @@ router.put('/:jobId/:userId/add', async (req, res, next) => {
     }
     const job = await Job.findByIdAndUpdate(
       jobId,
-      { $push: { applicants: userId } },
+      { $push: { applicants: { user: userId, status: 'Pending' } } },
       { new: true },
-    ).populate('applicants employee');
+    ).populate('applicants.user employee');
+    console.log('TCL: job', job);
     const user = await User.findByIdAndUpdate(
       userId,
       { $push: { 'nurse.candidateTo': jobId } },
