@@ -21,8 +21,11 @@ const jobSchema = new Schema(
     done: { type: Boolean, default: false },
     applicants: [
       {
-        type: ObjectId,
-        ref: 'User',
+        user: {
+          type: ObjectId,
+          ref: 'User',
+        },
+        status: { type: String, default: 'Pending' },
       },
     ],
   },
