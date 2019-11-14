@@ -83,7 +83,8 @@ router.get('/:jobId/detail', async (req, res, next) => {
   const { jobId } = req.params;
   try {
     const job = await Job.findById(jobId).populate(
-      'author employee applicants.user',
+      // 'author employee applicants', // ORIGINAL
+      'author employee applicants.user', // CHANGE IN MODEL
     );
     res.json({ status: 200, job });
   } catch (error) {
@@ -157,9 +158,9 @@ router.put('/:jobId/:userId/cancel', async (req, res, next) => {
     }
     const job = await Job.findByIdAndUpdate(
       jobId,
-      { $pull: { applicants: userId } },
+      { $pull: { applicants: { user: userId } } },
       { new: true },
-    ).populate('applicants employee');
+    ).populate('applicants.user employee');
     const user = await User.findByIdAndUpdate(
       userId,
       { $pull: { 'nurse.candidateTo': jobId } },
@@ -181,9 +182,9 @@ router.put('/:jobId/:userId/cancel', async (req, res, next) => {
 });
 
 // PUT route => to assign a USER to JOB
-router.put('/:jobId/:nurseId/assign', async (req, res, next) => {
-  const { jobId, nurseId } = req.params;
-  // console.log('TCL: req.body APPLY JOB', req.body);
+router.put('/:jobId/:nurseId/:applicationId/assign', async (req, res, next) => {
+  const { jobId, nurseId, applicationId } = req.params;
+  console.log('TCL: req.params APPLY JOB', req.params);
   try {
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
       res.status(400).json({ message: 'Specified job id is not valid' });
@@ -193,13 +194,51 @@ router.put('/:jobId/:nurseId/assign', async (req, res, next) => {
       jobId,
       { $set: { employee: nurseId } },
       { new: true },
-    ).populate('applicants employee');
+    ).populate('applicants.user employee');
+    console.log('TCL: job 1 Update employee', job);
 
-    job = await await Job.findByIdAndUpdate(
-      jobId,
-      { $pull: { applicants: nurseId } },
+    // job = await Job.findByIdAndUpdate(
+    //   jobId,
+    //   {
+    //     $set: {
+    //       applicants: [
+    //         {
+    //           user: nurseId,
+    //           status: 'Accepted',
+    //         },
+    //       ],
+    //     },
+    //   },
+    //   { new: true },
+    // ).populate('applicants.user employee');
+
+    job = await Job.findOneAndUpdate(
+      { _id: jobId, 'applicants._id': applicationId },
+      {
+        $set: {
+          'applicants.$.status': 'Accepted',
+        },
+      },
       { new: true },
-    ).populate('applicants employee');
+    ).populate('applicants.user employee');
+
+    // job = await Job.findOneAndUpdate(
+    //   { id: jobId, 'applicants.user': nurseId },
+    //   {
+    //     $set: {
+    //       'applicants.status': 'Accepted',
+    //     },
+    //   },
+    //   { new: true },
+    // ).populate('applicants.user employee');
+
+    // job = await Job.findOne({
+    //   id: jobId,
+    //   // 'applicants._id': applicationId,
+    // }).then(function(doc) {
+    //   console.log(doc);
+    // });
+    console.log('TCL: job 2 Update applicants', job);
 
     let nurse = await User.findByIdAndUpdate(
       nurseId,
@@ -213,7 +252,7 @@ router.put('/:jobId/:nurseId/assign', async (req, res, next) => {
       { new: true },
     );
     // .populate('nurse.candidateTo'); // Be carefull...!!!
-    console.log('TCL: user', nurse);
+    console.log('TCL: user NURSE', nurse);
     // req.session.currentUser = user;
 
     // console.log('TCL: userID, jobID: ', jobId);
@@ -241,13 +280,23 @@ router.put('/:jobId/:nurseId/cancelAssign', async (req, res, next) => {
       jobId,
       { $unset: { employee: nurseId } },
       { new: true },
-    ).populate('applicants employee');
+    ).populate('applicants.user employee');
 
-    job = await await Job.findByIdAndUpdate(
-      jobId,
-      { $push: { applicants: nurseId } },
+    // job = await await Job.findByIdAndUpdate(
+    //   jobId,
+    //   { $push: { applicants: nurseId } },
+    //   { new: true },
+    // ).populate('applicants employee');
+
+    job = await Job.findOneAndUpdate(
+      { _id: jobId, 'applicants.user': nurseId },
+      {
+        $set: {
+          'applicants.$.status': 'Pending',
+        },
+      },
       { new: true },
-    ).populate('applicants employee');
+    ).populate('applicants.user employee');
 
     let nurse = await User.findByIdAndUpdate(
       nurseId,
