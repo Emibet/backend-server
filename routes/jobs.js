@@ -57,7 +57,7 @@ router.post('/:username/new', async (req, res, next) => {
 // GET route => to view all JOBS
 router.get('/all', async (req, res, next) => {
   try {
-    const jobs = await Job.find().populate('author employee');
+    const jobs = await Job.find().populate('author employee applicants.user');
     res.json({ status: 200, jobs });
   } catch (error) {
     next(error);
@@ -70,7 +70,7 @@ router.get('/:username/all', async (req, res, next) => {
   try {
     const company = await Company.find({ username });
     const jobs = await Job.find({ author: company[0]._id }).populate(
-      'author employee',
+      'author employee applicants.user',
     );
     res.json({ status: 200, jobs });
   } catch (error) {
@@ -318,6 +318,65 @@ router.put('/:jobId/:nurseId/cancelAssign', async (req, res, next) => {
       status: 200,
       job,
       nurse,
+      message: `Job with id: ${jobId} updated successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT route => to DECLINE the Job petition
+router.put('/:jobId/:nurseId/declineAssign', async (req, res, next) => {
+  const { jobId, nurseId } = req.params;
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+
+    const job = await Job.findOneAndUpdate(
+      { _id: jobId, 'applicants.user': nurseId },
+      {
+        $set: {
+          'applicants.$.status': 'Declined',
+        },
+      },
+      { new: true },
+    ).populate('applicants.user employee');
+    console.log('TCL: job', job);
+
+    res.json({
+      status: 200,
+      job,
+      message: `Job with id: ${jobId} updated successfully`,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// PUT route => to DECLINE the Job petition
+router.put('/:jobId/:nurseId/pendingAssign', async (req, res, next) => {
+  const { jobId, nurseId } = req.params;
+  try {
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      res.status(400).json({ message: 'Specified job id is not valid' });
+      return;
+    }
+
+    const job = await Job.findOneAndUpdate(
+      { _id: jobId, 'applicants.user': nurseId },
+      {
+        $set: {
+          'applicants.$.status': 'Pending',
+        },
+      },
+      { new: true },
+    ).populate('applicants.user employee');
+
+    res.json({
+      status: 200,
+      job,
       message: `Job with id: ${jobId} updated successfully`,
     });
   } catch (error) {
