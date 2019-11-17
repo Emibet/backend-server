@@ -241,11 +241,11 @@ router.put('/:jobId/:nurseId/:applicationId/assign', async (req, res, next) => {
     // });
     console.log('TCL: job 2 Update applicants', job);
 
-    let nurse = await User.findByIdAndUpdate(
-      nurseId,
-      { $pull: { 'nurse.candidateTo': jobId } },
-      { new: true },
-    );
+    // let nurse = await User.findByIdAndUpdate(
+    //   nurseId,
+    //   { $pull: { 'nurse.candidateTo': jobId } },
+    //   { new: true },
+    // );
 
     nurse = await User.findByIdAndUpdate(
       nurseId,
