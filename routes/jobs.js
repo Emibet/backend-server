@@ -45,6 +45,7 @@ router.post('/:username/new', async (req, res, next) => {
       { $push: { jobs: job._id } },
       { upsert: true },
     );
+    req.session.currentUser = companyUpdate;
     res.json({
       status: 200,
       job,
